@@ -578,17 +578,78 @@ contract BatchOptimization is Script {
 
     /**
      * @notice Run comprehensive gas analysis and batching demonstration
+     * @dev Attempts to read environment variables, provides helpful error messages if missing
      */
     function run() external {
-        console.log("Info logged");
-        console.log("Info logged");
-        console.log("Info logged");
-        console.log("Info logged");
-        console.log("Info logged");
-        console.log("Info logged");
-        console.log("Info logged");
-        console.log("Info logged");
-        console.log("Info logged");
-        console.log("Info logged");
+        console.log("=== Batch Optimization Script ===");
+        
+        // Try to read environment variables with error handling
+        address proxyAddress;
+        address adminAddress;
+        
+        try vm.envAddress("PROXY_ADDRESS") returns (address addr) {
+            proxyAddress = addr;
+        } catch {
+            console.log("ERROR: PROXY_ADDRESS environment variable not set");
+            console.log("Please set the proxy address of your deployed Crurated contract");
+            console.log("Example: export PROXY_ADDRESS=0x...");
+            console.log("Or use the batch_optimize.sh script for automated setup");
+            return;
+        }
+        
+        try vm.envAddress("ADMIN") returns (address addr) {
+            adminAddress = addr;
+        } catch {
+            console.log("ERROR: ADMIN environment variable not set");
+            console.log("Please set the admin address for contract operations");
+            console.log("Example: export ADMIN=0x...");
+            console.log("Or use the batch_optimize.sh script for automated setup");
+            return;
+        }
+        
+        console.log("Initializing with proxy:", proxyAddress);
+        console.log("Using admin:", adminAddress);
+        
+        // Initialize the contract
+        this.initialize(proxyAddress, adminAddress, 0);
+        
+        console.log("Running basic gas analysis...");
+        
+        // Run basic analysis
+        try this.analyzeMintGas(20) {
+            console.log("[OK] Mint gas analysis completed");
+        } catch {
+            console.log("[ERROR] Mint gas analysis failed - check contract state");
+        }
+        
+        try this.analyzeMigrateGas(10, 2) {
+            console.log("[OK] Migrate gas analysis completed");
+        } catch {
+            console.log("[ERROR] Migrate gas analysis failed - check contract state");
+        }
+        
+        console.log("=== Script completed ===");
+        console.log("For more detailed operations, use:");
+        console.log("- analyzeMintGas(maxTestSize)");
+        console.log("- analyzeMigrateGas(maxTestSize, statusCount)");
+        console.log("- calculateAdditionalGasCost(...)");
+        console.log("- executeBatchedMints(operations)");
+        console.log("- executeBatchedMigrations(operations)");
+    }
+
+    /**
+     * @notice Standalone initialization for direct script usage
+     * @dev Call this before using other functions if not using run()
+     */
+    function setup() external {
+        address proxyAddress = vm.envAddress("PROXY_ADDRESS");
+        address adminAddress = vm.envAddress("ADMIN");
+        
+        console.log("Setting up BatchOptimization...");
+        console.log("Proxy:", proxyAddress);
+        console.log("Admin:", adminAddress);
+        
+        this.initialize(proxyAddress, adminAddress, 0);
+        console.log("[OK] Setup complete");
     }
 }

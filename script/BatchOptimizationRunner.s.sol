@@ -32,152 +32,204 @@ contract BatchOptimizationRunner is Script {
      * @dev Requires deployed Crurated contract and environment variables
      */
     function run() external {
-        // Load environment variables
-        address proxyAddress = vm.envAddress("PROXY_ADDRESS");
-        owner = vm.envAddress("OWNER");
-        admin = vm.envAddress("ADMIN");
+        console.log("=== Batch Optimization Runner ===");
         
-        console.log("Info logged");
-        console.log("Info logged");
-        console.log("Info logged");
-        console.log("Info logged");
+        // Load environment variables with error handling
+        address proxyAddress;
+        try vm.envAddress("PROXY_ADDRESS") returns (address addr) {
+            proxyAddress = addr;
+        } catch {
+            console.log("ERROR: PROXY_ADDRESS environment variable not set");
+            console.log("Please set the proxy address of your deployed Crurated contract");
+            console.log("Example: export PROXY_ADDRESS=0x...");
+            console.log("Or use: ./batch_optimize.sh deploy-local");
+            return;
+        }
+        
+        try vm.envAddress("OWNER") returns (address addr) {
+            owner = addr;
+        } catch {
+            console.log("ERROR: OWNER environment variable not set");
+            console.log("Please set the owner address");
+            console.log("Example: export OWNER=0x...");
+            return;
+        }
+        
+        try vm.envAddress("ADMIN") returns (address addr) {
+            admin = addr;
+        } catch {
+            console.log("ERROR: ADMIN environment variable not set");
+            console.log("Please set the admin address");
+            console.log("Example: export ADMIN=0x...");
+            return;
+        }
+        
+        console.log("Proxy Address:", proxyAddress);
+        console.log("Owner Address:", owner);
+        console.log("Admin Address:", admin);
         
         // Initialize contracts
         proxy = Crurated(proxyAddress);
         optimizer = new BatchOptimization();
-        optimizer.initialize(proxyAddress, admin, 0); // Use default gas limit
+        
+        try optimizer.initialize(proxyAddress, admin, 0) {
+            console.log("[OK] Optimizer initialized");
+        } catch {
+            console.log("[ERROR] Failed to initialize optimizer");
+            return;
+        }
         
         // Setup required status types
         _setupStatusTypes();
         
         // Run demonstrations
+        console.log("Running demonstrations...");
         _demonstrateMintOptimization();
         _demonstrateMigrateOptimization();
         _demonstrateGasCostAnalysis();
         
-        console.log("Info logged");
+        console.log("=== All demonstrations completed successfully! ===");
     }
 
     /**
      * @notice Analyze mint operations gas usage patterns
      */
     function analyzeMintGas() external {
-        address proxyAddress = vm.envAddress("PROXY_ADDRESS");
-        admin = vm.envAddress("ADMIN");
+        if (!_initializeOptimizer()) return;
         
-        optimizer = new BatchOptimization();
-        optimizer.initialize(proxyAddress, admin, 0);
-        
-        console.log("Info logged");
-        BatchOptimization.GasAnalysis memory analysis = optimizer.analyzeMintGas(100);
-        
-        console.log("Info logged");
-        console.log("Info logged");
+        console.log("Analyzing mint gas patterns...");
+        try optimizer.analyzeMintGas(100) {
+            console.log("[OK] Mint gas analysis completed successfully");
+        } catch {
+            console.log("[ERROR] Mint gas analysis failed");
+        }
     }
 
     /**
      * @notice Analyze migrate operations gas usage patterns
      */
     function analyzeMigrateGas() external {
-        address proxyAddress = vm.envAddress("PROXY_ADDRESS");
-        admin = vm.envAddress("ADMIN");
+        if (!_initializeOptimizer()) return;
         
-        optimizer = new BatchOptimization();
-        optimizer.initialize(proxyAddress, admin, 0);
-        
-        console.log("Info logged");
-        BatchOptimization.GasAnalysis memory analysis = optimizer.analyzeMigrateGas(50, 3); // 3 status entries per migration
-        
-        console.log("Info logged");
-        console.log("Info logged");
+        console.log("Analyzing migrate gas patterns...");
+        try optimizer.analyzeMigrateGas(50, 3) {
+            console.log("[OK] Migrate gas analysis completed successfully");
+        } catch {
+            console.log("[ERROR] Migrate gas analysis failed");
+        }
     }
 
     /**
      * @notice Execute sample mint operations using optimal batching
      */
     function executeSampleMints() external {
-        address proxyAddress = vm.envAddress("PROXY_ADDRESS");
-        admin = vm.envAddress("ADMIN");
-        
-        optimizer = new BatchOptimization();
-        optimizer.initialize(proxyAddress, admin, 0);
+        if (!_initializeOptimizer()) return;
         
         // Create sample mint operations
         BatchOptimization.MintOperation[] memory operations = _createSampleMintOperations(25);
         
-        console.log("Info logged");
-        uint256[] memory tokenIds = optimizer.executeBatchedMints(operations);
-        
-        console.log("Info logged");
-        console.log("Info logged");
-        console.log("Info logged");
+        console.log("Executing sample mint operations...");
+        try optimizer.executeBatchedMints(operations) returns (uint256[] memory tokenIds) {
+            console.log("[OK] Successfully executed mint operations");
+            console.log("Operations count:", operations.length);
+            console.log("Generated tokens:", tokenIds.length);
+        } catch {
+            console.log("[ERROR] Failed to execute mint operations");
+        }
     }
 
     /**
      * @notice Execute sample migrate operations using optimal batching
      */
     function executeSampleMigrations() external {
-        address proxyAddress = vm.envAddress("PROXY_ADDRESS");
-        admin = vm.envAddress("ADMIN");
-        
-        optimizer = new BatchOptimization();
-        optimizer.initialize(proxyAddress, admin, 0);
+        if (!_initializeOptimizer()) return;
         
         // Setup status types first
-        vm.startPrank(admin);
-        proxy = Crurated(proxyAddress);
-        proxy.addStatus("Created");
-        proxy.addStatus("Verified"); 
-        proxy.addStatus("Certified");
-        vm.stopPrank();
+        _setupStatusTypes();
         
         // Create sample migrate operations
         BatchOptimization.MigrateOperation[] memory operations = _createSampleMigrateOperations(15);
         
-        console.log("Info logged");
-        uint256[] memory tokenIds = optimizer.executeBatchedMigrations(operations);
-        
-        console.log("Info logged");
-        console.log("Info logged");
-        console.log("Info logged");
+        console.log("Executing sample migrate operations...");
+        try optimizer.executeBatchedMigrations(operations) returns (uint256[] memory tokenIds) {
+            console.log("[OK] Successfully executed migrate operations");
+            console.log("Operations count:", operations.length);
+            console.log("Generated tokens:", tokenIds.length);
+        } catch {
+            console.log("[ERROR] Failed to execute migrate operations");
+        }
     }
 
     /**
      * @notice Calculate gas costs for different batch size increases
      */
     function analyzeIncrementalGasCosts() external {
-        address proxyAddress = vm.envAddress("PROXY_ADDRESS");
-        admin = vm.envAddress("ADMIN");
+        if (!_initializeOptimizer()) return;
         
-        optimizer = new BatchOptimization();
-        optimizer.initialize(proxyAddress, admin, 0);
-        
-        console.log("Info logged");
+        console.log("Analyzing incremental gas costs...");
         
         // Analyze mint costs
-        console.log("Info logged");
-        uint256 mintGasCost1to5 = optimizer.calculateAdditionalGasCost(1, 4, "mint", 0);
-        uint256 mintGasCost5to10 = optimizer.calculateAdditionalGasCost(5, 5, "mint", 0);
-        uint256 mintGasCost10to20 = optimizer.calculateAdditionalGasCost(10, 10, "mint", 0);
+        console.log("--- Mint Cost Analysis ---");
+        try optimizer.calculateAdditionalGasCost(1, 4, "mint", 0) returns (uint256 cost) {
+            console.log("Adding 4 items to batch of 1");
+            console.log("Additional gas cost:", cost);
+        } catch {
+            console.log("[ERROR] Failed to analyze mint costs (1->5)");
+        }
+        
+        try optimizer.calculateAdditionalGasCost(5, 5, "mint", 0) returns (uint256 cost) {
+            console.log("Adding 5 items to batch of 5");
+            console.log("Additional gas cost:", cost);
+        } catch {
+            console.log("[ERROR] Failed to analyze mint costs (5->10)");
+        }
         
         // Analyze migrate costs
-        console.log("Info logged");
-        uint256 migrateGasCost1to3 = optimizer.calculateAdditionalGasCost(1, 2, "migrate", 2);
-        uint256 migrateGasCost3to6 = optimizer.calculateAdditionalGasCost(3, 3, "migrate", 2);
-        uint256 migrateGasCost6to10 = optimizer.calculateAdditionalGasCost(6, 4, "migrate", 2);
+        console.log("--- Migrate Cost Analysis ---");
+        try optimizer.calculateAdditionalGasCost(1, 2, "migrate", 2) returns (uint256 cost) {
+            console.log("Adding 2 items to batch of 1");
+            console.log("Additional gas cost:", cost);
+        } catch {
+            console.log("[ERROR] Failed to analyze migrate costs (1->3)");
+        }
         
-        console.log("Info logged");
-        console.log("Info logged");
-        console.log("Info logged");
-        console.log("Info logged");
-        console.log("Info logged");
-        console.log("Info logged");
-        console.log("Info logged");
+        console.log("[OK] Incremental cost analysis completed");
     }
 
     /*//////////////////////////////////////////////////////////////
                             INTERNAL FUNCTIONS
     //////////////////////////////////////////////////////////////*/
+
+    /**
+     * @dev Initialize optimizer with environment variables
+     * @return success True if initialization was successful
+     */
+    function _initializeOptimizer() internal returns (bool success) {
+        address proxyAddress;
+        try vm.envAddress("PROXY_ADDRESS") returns (address addr) {
+            proxyAddress = addr;
+        } catch {
+            console.log("[ERROR] PROXY_ADDRESS not set. Use: export PROXY_ADDRESS=0x...");
+            return false;
+        }
+        
+        try vm.envAddress("ADMIN") returns (address addr) {
+            admin = addr;
+        } catch {
+            console.log("[ERROR] ADMIN not set. Use: export ADMIN=0x...");
+            return false;
+        }
+        
+        proxy = Crurated(proxyAddress);
+        optimizer = new BatchOptimization();
+        
+        try optimizer.initialize(proxyAddress, admin, 0) {
+            return true;
+        } catch {
+            console.log("[ERROR] Failed to initialize optimizer with provided addresses");
+            return false;
+        }
+    }
 
     /**
      * @dev Setup required status types for demonstrations

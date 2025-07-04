@@ -53,19 +53,20 @@ check_env_vars() {
 
 # Function to load environment variables
 load_env() {
+    # Load from .env file if it exists
     if [ -f ".env" ]; then
         print_status "Loading environment variables from .env file"
-        while IFS= read -r line || [ -n "$line" ]; do
-            # Skip empty lines and comments
-            if [[ -z "$line" || "$line" =~ ^[[:space:]]*# ]]; then
-                continue
-            fi
-
-            # Export the variable if it's a valid assignment
-            if [[ "$line" =~ ^[[:space:]]*[A-Za-z_][A-Za-z0-9_]*= ]]; then
-                export "$line"
-            fi
-        done < .env
+        set -a  # automatically export all variables
+        source .env
+        set +a
+    fi
+    
+    # Load from .env.local file if it exists (overrides .env)
+    if [ -f ".env.local" ]; then
+        print_status "Loading environment variables from .env.local file"
+        set -a  # automatically export all variables
+        source .env.local
+        set +a
     fi
 }
 
