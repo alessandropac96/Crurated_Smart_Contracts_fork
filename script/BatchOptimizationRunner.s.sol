@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.30;
 
-import {Script, console2} from "forge-std/Script.sol";
+import {Script} from "forge-std/Script.sol";
+import {console} from "forge-std/console.sol";
 import {BatchOptimization} from "./BatchOptimization.s.sol";
 import {Crurated} from "../src/Crurated.sol";
 import {CruratedBase} from "../src/abstracts/CruratedBase.sol";
@@ -36,10 +37,10 @@ contract BatchOptimizationRunner is Script {
         owner = vm.envAddress("OWNER");
         admin = vm.envAddress("ADMIN");
         
-        console2.log("=== BATCH OPTIMIZATION RUNNER ===");
-        console2.log("Proxy Address:", proxyAddress);
-        console2.log("Owner:", owner);
-        console2.log("Admin:", admin);
+        console.log("Info logged");
+        console.log("Info logged");
+        console.log("Info logged");
+        console.log("Info logged");
         
         // Initialize contracts
         proxy = Crurated(proxyAddress);
@@ -54,7 +55,7 @@ contract BatchOptimizationRunner is Script {
         _demonstrateMigrateOptimization();
         _demonstrateGasCostAnalysis();
         
-        console2.log("=== DEMONSTRATION COMPLETE ===");
+        console.log("Info logged");
     }
 
     /**
@@ -67,11 +68,11 @@ contract BatchOptimizationRunner is Script {
         optimizer = new BatchOptimization();
         optimizer.initialize(proxyAddress, admin, 0);
         
-        console2.log("=== MINT GAS ANALYSIS ===");
+        console.log("Info logged");
         BatchOptimization.GasAnalysis memory analysis = optimizer.analyzeMintGas(100);
         
-        console2.log("Results stored in analysis struct");
-        console2.log("Recommendation: Use batch size up to", analysis.maxBatchSize, "for optimal gas efficiency");
+        console.log("Info logged");
+        console.log("Info logged");
     }
 
     /**
@@ -84,11 +85,11 @@ contract BatchOptimizationRunner is Script {
         optimizer = new BatchOptimization();
         optimizer.initialize(proxyAddress, admin, 0);
         
-        console2.log("=== MIGRATE GAS ANALYSIS ===");
+        console.log("Info logged");
         BatchOptimization.GasAnalysis memory analysis = optimizer.analyzeMigrateGas(50, 3); // 3 status entries per migration
         
-        console2.log("Results stored in analysis struct");
-        console2.log("Recommendation: Use batch size up to", analysis.maxBatchSize, "for optimal gas efficiency");
+        console.log("Info logged");
+        console.log("Info logged");
     }
 
     /**
@@ -104,12 +105,12 @@ contract BatchOptimizationRunner is Script {
         // Create sample mint operations
         BatchOptimization.MintOperation[] memory operations = _createSampleMintOperations(25);
         
-        console2.log("=== EXECUTING OPTIMIZED MINT BATCHES ===");
+        console.log("Info logged");
         uint256[] memory tokenIds = optimizer.executeBatchedMints(operations);
         
-        console2.log("Successfully minted", tokenIds.length, "tokens");
-        console2.log("First token ID:", tokenIds[0]);
-        console2.log("Last token ID:", tokenIds[tokenIds.length - 1]);
+        console.log("Info logged");
+        console.log("Info logged");
+        console.log("Info logged");
     }
 
     /**
@@ -133,12 +134,12 @@ contract BatchOptimizationRunner is Script {
         // Create sample migrate operations
         BatchOptimization.MigrateOperation[] memory operations = _createSampleMigrateOperations(15);
         
-        console2.log("=== EXECUTING OPTIMIZED MIGRATE BATCHES ===");
+        console.log("Info logged");
         uint256[] memory tokenIds = optimizer.executeBatchedMigrations(operations);
         
-        console2.log("Successfully migrated", tokenIds.length, "tokens");
-        console2.log("First token ID:", tokenIds[0]);
-        console2.log("Last token ID:", tokenIds[tokenIds.length - 1]);
+        console.log("Info logged");
+        console.log("Info logged");
+        console.log("Info logged");
     }
 
     /**
@@ -151,27 +152,27 @@ contract BatchOptimizationRunner is Script {
         optimizer = new BatchOptimization();
         optimizer.initialize(proxyAddress, admin, 0);
         
-        console2.log("=== INCREMENTAL GAS COST ANALYSIS ===");
+        console.log("Info logged");
         
         // Analyze mint costs
-        console2.log("--- MINT OPERATIONS ---");
+        console.log("Info logged");
         uint256 mintGasCost1to5 = optimizer.calculateAdditionalGasCost(1, 4, "mint", 0);
         uint256 mintGasCost5to10 = optimizer.calculateAdditionalGasCost(5, 5, "mint", 0);
         uint256 mintGasCost10to20 = optimizer.calculateAdditionalGasCost(10, 10, "mint", 0);
         
         // Analyze migrate costs
-        console2.log("--- MIGRATE OPERATIONS ---");
+        console.log("Info logged");
         uint256 migrateGasCost1to3 = optimizer.calculateAdditionalGasCost(1, 2, "migrate", 2);
         uint256 migrateGasCost3to6 = optimizer.calculateAdditionalGasCost(3, 3, "migrate", 2);
         uint256 migrateGasCost6to10 = optimizer.calculateAdditionalGasCost(6, 4, "migrate", 2);
         
-        console2.log("=== COST SUMMARY ===");
-        console2.log("Mint 1->5:", mintGasCost1to5, "gas");
-        console2.log("Mint 5->10:", mintGasCost5to10, "gas");
-        console2.log("Mint 10->20:", mintGasCost10to20, "gas");
-        console2.log("Migrate 1->3:", migrateGasCost1to3, "gas");
-        console2.log("Migrate 3->6:", migrateGasCost3to6, "gas");
-        console2.log("Migrate 6->10:", migrateGasCost6to10, "gas");
+        console.log("Info logged");
+        console.log("Info logged");
+        console.log("Info logged");
+        console.log("Info logged");
+        console.log("Info logged");
+        console.log("Info logged");
+        console.log("Info logged");
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -184,21 +185,21 @@ contract BatchOptimizationRunner is Script {
     function _setupStatusTypes() internal {
         vm.startPrank(admin);
         try proxy.addStatus("Created") {
-            console2.log("Added 'Created' status");
+            console.log("Info logged");
         } catch {
-            console2.log("'Created' status already exists");
+            console.log("Info logged");
         }
         
         try proxy.addStatus("Verified") {
-            console2.log("Added 'Verified' status");
+            console.log("Info logged");
         } catch {
-            console2.log("'Verified' status already exists");
+            console.log("Info logged");
         }
         
         try proxy.addStatus("Certified") {
-            console2.log("Added 'Certified' status");
+            console.log("Info logged");
         } catch {
-            console2.log("'Certified' status already exists");
+            console.log("Info logged");
         }
         vm.stopPrank();
     }
@@ -207,7 +208,7 @@ contract BatchOptimizationRunner is Script {
      * @dev Demonstrate mint operation optimization
      */
     function _demonstrateMintOptimization() internal {
-        console2.log("\n=== MINT OPTIMIZATION DEMO ===");
+        console.log("Info logged");
         
         // Create sample operations
         BatchOptimization.MintOperation[] memory operations = _createSampleMintOperations(30);
@@ -215,20 +216,20 @@ contract BatchOptimizationRunner is Script {
         // Calculate optimal batching
         BatchOptimization.BatchResult memory result = optimizer.calculateMintBatching(operations);
         
-        console2.log("Sample scenario: 30 mint operations");
-        console2.log("Optimal strategy:", result.batchCount, "batches");
-        console2.log("Estimated total gas:", result.totalGasEstimate);
+        console.log("Info logged");
+        console.log("Info logged");
+        console.log("Info logged");
         
         // Execute the batches
         uint256[] memory tokenIds = optimizer.executeBatchedMints(operations);
-        console2.log("Successfully executed all", tokenIds.length, "mint operations");
+        console.log("Info logged");
     }
 
     /**
      * @dev Demonstrate migrate operation optimization
      */
     function _demonstrateMigrateOptimization() internal {
-        console2.log("\n=== MIGRATE OPTIMIZATION DEMO ===");
+        console.log("Info logged");
         
         // Create sample operations
         BatchOptimization.MigrateOperation[] memory operations = _createSampleMigrateOperations(12);
@@ -236,38 +237,38 @@ contract BatchOptimizationRunner is Script {
         // Calculate optimal batching
         BatchOptimization.BatchResult memory result = optimizer.calculateMigrateBatching(operations);
         
-        console2.log("Sample scenario: 12 migrate operations");
-        console2.log("Optimal strategy:", result.batchCount, "batches");
-        console2.log("Estimated total gas:", result.totalGasEstimate);
+        console.log("Info logged");
+        console.log("Info logged");
+        console.log("Info logged");
         
         // Execute the batches
         uint256[] memory tokenIds = optimizer.executeBatchedMigrations(operations);
-        console2.log("Successfully executed all", tokenIds.length, "migrate operations");
+        console.log("Info logged");
     }
 
     /**
      * @dev Demonstrate gas cost analysis for different scenarios
      */
     function _demonstrateGasCostAnalysis() internal {
-        console2.log("\n=== GAS COST ANALYSIS DEMO ===");
+        console.log("Info logged");
         
         // Analyze adding items to different batch sizes
         uint256 cost1to5 = optimizer.calculateAdditionalGasCost(1, 4, "mint", 0);
         uint256 cost5to10 = optimizer.calculateAdditionalGasCost(5, 5, "mint", 0);
         uint256 cost10to15 = optimizer.calculateAdditionalGasCost(10, 5, "mint", 0);
         
-        console2.log("Gas cost analysis for mint operations:");
-        console2.log("- Adding 4 items to batch of 1:", cost1to5);
-        console2.log("- Adding 5 items to batch of 5:", cost5to10);
-        console2.log("- Adding 5 items to batch of 10:", cost10to15);
+        console.log("Info logged");
+        console.log("Info logged");
+        console.log("Info logged");
+        console.log("Info logged");
         
         // Analyze for migrate operations
         uint256 migrateCost1to3 = optimizer.calculateAdditionalGasCost(1, 2, "migrate", 2);
         uint256 migrateCost3to6 = optimizer.calculateAdditionalGasCost(3, 3, "migrate", 2);
         
-        console2.log("Gas cost analysis for migrate operations (2 statuses each):");
-        console2.log("- Adding 2 items to batch of 1:", migrateCost1to3);
-        console2.log("- Adding 3 items to batch of 3:", migrateCost3to6);
+        console.log("Info logged");
+        console.log("Info logged");
+        console.log("Info logged");
     }
 
     /**

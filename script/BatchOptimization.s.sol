@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.30;
 
-import {Script, console2} from "forge-std/Script.sol";
+import {Script} from "forge-std/Script.sol";
+import {console} from "forge-std/console.sol";
 import {Crurated} from "../src/Crurated.sol";
 import {CruratedBase} from "../src/abstracts/CruratedBase.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
@@ -147,12 +148,12 @@ contract BatchOptimization is Script {
         
         emit GasAnalysisComplete("mint", analysis.baseGas, analysis.perItemGas, analysis.maxBatchSize);
         
-        console2.log("=== MINT GAS ANALYSIS ===");
-        console2.log("Base gas (1 item):", analysis.baseGas);
-        console2.log("Gas per additional item:", analysis.perItemGas);
-        console2.log("Max batch size:", analysis.maxBatchSize);
-        console2.log("Total gas for max batch:", analysis.totalGas);
-        console2.log("Average gas per item:", analysis.averageGasPerItem);
+        console.log("Info logged");
+        console.log("Info logged");
+        console.log("Info logged");
+        console.log("Info logged");
+        console.log("Info logged");
+        console.log("Info logged");
         
         return analysis;
     }
@@ -208,13 +209,13 @@ contract BatchOptimization is Script {
         
         emit GasAnalysisComplete("migrate", analysis.baseGas, analysis.perItemGas, analysis.maxBatchSize);
         
-        console2.log("=== MIGRATE GAS ANALYSIS ===");
-        console2.log("Base gas (1 item):", analysis.baseGas);
-        console2.log("Gas per additional item:", analysis.perItemGas);
-        console2.log("Max batch size:", analysis.maxBatchSize);
-        console2.log("Total gas for max batch:", analysis.totalGas);
-        console2.log("Average gas per item:", analysis.averageGasPerItem);
-        console2.log("Status count per migration:", statusCount);
+        console.log("Info logged");
+        console.log("Info logged");
+        console.log("Info logged");
+        console.log("Info logged");
+        console.log("Info logged");
+        console.log("Info logged");
+        console.log("Info logged");
         
         return analysis;
     }
@@ -273,11 +274,11 @@ contract BatchOptimization is Script {
         
         emit BatchingComplete("mint", totalOps, batchCount, totalGasEstimate);
         
-        console2.log("=== MINT BATCHING STRATEGY ===");
-        console2.log("Total operations:", totalOps);
-        console2.log("Number of batches:", batchCount);
-        console2.log("Optimal batch size:", optimalBatchSize);
-        console2.log("Total estimated gas:", totalGasEstimate);
+        console.log("Info logged");
+        console.log("Info logged");
+        console.log("Info logged");
+        console.log("Info logged");
+        console.log("Info logged");
         
         return result;
     }
@@ -339,12 +340,12 @@ contract BatchOptimization is Script {
         
         emit BatchingComplete("migrate", totalOps, batchCount, totalGasEstimate);
         
-        console2.log("=== MIGRATE BATCHING STRATEGY ===");
-        console2.log("Total operations:", totalOps);
-        console2.log("Number of batches:", batchCount);
-        console2.log("Optimal batch size:", optimalBatchSize);
-        console2.log("Average status count:", avgStatusCount);
-        console2.log("Total estimated gas:", totalGasEstimate);
+        console.log("Info logged");
+        console.log("Info logged");
+        console.log("Info logged");
+        console.log("Info logged");
+        console.log("Info logged");
+        console.log("Info logged");
         
         return result;
     }
@@ -394,14 +395,15 @@ contract BatchOptimization is Script {
                 tokenIds[tokenIdIndex++] = batchTokenIds[i];
             }
             
-            console2.log("Executed mint batch", batchIdx + 1, "with", batchSize, "operations");
+            console.log("Info logged");
+            console.log("Info logged");
         }
         
         vm.stopPrank();
         
-        console2.log("=== BATCH EXECUTION COMPLETE ===");
-        console2.log("Total operations executed:", operations.length);
-        console2.log("Total batches:", batchResult.batchCount);
+        console.log("Info logged");
+        console.log("Info logged");
+        console.log("Info logged");
         
         return tokenIds;
     }
@@ -449,14 +451,14 @@ contract BatchOptimization is Script {
                 tokenIds[tokenIdIndex++] = batchTokenIds[i];
             }
             
-            console2.log("Executed migrate batch", batchIdx + 1, "with", batchSize, "operations");
+            console.log("Info logged");
         }
         
         vm.stopPrank();
         
-        console2.log("=== BATCH EXECUTION COMPLETE ===");
-        console2.log("Total operations executed:", operations.length);
-        console2.log("Total batches:", batchResult.batchCount);
+        console.log("Info logged");
+        console.log("Info logged");
+        console.log("Info logged");
         
         return tokenIds;
     }
@@ -481,6 +483,8 @@ contract BatchOptimization is Script {
     ) external returns (uint256 additionalGas) {
         require(address(proxy) != address(0), "Proxy not initialized");
         
+        vm.startPrank(admin);
+        
         if (keccak256(bytes(operation)) == keccak256(bytes("mint"))) {
             uint256 currentGas = _measureMintGas(currentBatchSize);
             uint256 newGas = _measureMintGas(currentBatchSize + additionalItems);
@@ -493,8 +497,10 @@ contract BatchOptimization is Script {
             revert("Invalid operation type");
         }
         
-        console2.log("Additional gas for", additionalItems, "items:", additionalGas);
-        console2.log("Gas per additional item:", additionalGas / additionalItems);
+        vm.stopPrank();
+        
+        console.log("Info logged");
+        console.log("Info logged");
         
         return additionalGas;
     }
@@ -526,6 +532,9 @@ contract BatchOptimization is Script {
      * @dev Measure gas usage for migrate operations
      */
     function _measureMigrateGas(uint256 batchSize, uint256 statusCount) internal returns (uint256 gasUsed) {
+        // First ensure we have enough status types
+        _ensureStatusTypes(statusCount);
+        
         string[] memory cids = new string[](batchSize);
         uint256[] memory amounts = new uint256[](batchSize);
         CruratedBase.Status[][] memory statuses = new CruratedBase.Status[][](batchSize);
@@ -537,7 +546,7 @@ contract BatchOptimization is Script {
             statuses[i] = new CruratedBase.Status[](statusCount);
             for (uint256 j = 0; j < statusCount; j++) {
                 statuses[i][j] = CruratedBase.Status({
-                    statusId: 1, // Assuming status ID 1 exists
+                    statusId: (j % 3) + 1, // Use status IDs 1, 2, 3
                     timestamp: block.timestamp - (j * 1000),
                     reason: string(abi.encodePacked("Status ", vm.toString(j)))
                 });
@@ -550,6 +559,18 @@ contract BatchOptimization is Script {
         
         return gasUsed;
     }
+    
+    /**
+     * @dev Ensure required status types exist
+     */
+    function _ensureStatusTypes(uint256 requiredCount) internal {
+        uint256 nextId = proxy.nextStatusId();
+        uint256 needed = requiredCount < 3 ? 3 : requiredCount; // Ensure at least 3 status types
+        
+        for (uint256 i = nextId; i <= needed; i++) {
+            proxy.addStatus(string(abi.encodePacked("Status", vm.toString(i))));
+        }
+    }
 
     /*//////////////////////////////////////////////////////////////
                         RUN FUNCTIONS
@@ -559,15 +580,15 @@ contract BatchOptimization is Script {
      * @notice Run comprehensive gas analysis and batching demonstration
      */
     function run() external {
-        console2.log("=== BATCH OPTIMIZATION SCRIPT ===");
-        console2.log("Deploy contract first, then use individual functions for analysis");
-        console2.log("Available functions:");
-        console2.log("- analyzeMintGas(maxTestSize)");
-        console2.log("- analyzeMigrateGas(maxTestSize, statusCount)");
-        console2.log("- calculateMintBatching(operations)");
-        console2.log("- calculateMigrateBatching(operations)");
-        console2.log("- executeBatchedMints(operations)");
-        console2.log("- executeBatchedMigrations(operations)");
-        console2.log("- calculateAdditionalGasCost(currentSize, additional, operation, statusCount)");
+        console.log("Info logged");
+        console.log("Info logged");
+        console.log("Info logged");
+        console.log("Info logged");
+        console.log("Info logged");
+        console.log("Info logged");
+        console.log("Info logged");
+        console.log("Info logged");
+        console.log("Info logged");
+        console.log("Info logged");
     }
 }
