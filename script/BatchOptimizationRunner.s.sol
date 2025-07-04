@@ -236,91 +236,78 @@ contract BatchOptimizationRunner is Script {
      */
     function _setupStatusTypes() internal {
         vm.startPrank(admin);
-        try proxy.addStatus("Created") {
-            console.log("Info logged");
-        } catch {
-            console.log("Info logged");
-        }
         
-        try proxy.addStatus("Verified") {
-            console.log("Info logged");
-        } catch {
-            console.log("Info logged");
-        }
+        // Setup status types silently - they may already exist
+        try proxy.addStatus("Created") {} catch {}
+        try proxy.addStatus("Verified") {} catch {}
+        try proxy.addStatus("Certified") {} catch {}
         
-        try proxy.addStatus("Certified") {
-            console.log("Info logged");
-        } catch {
-            console.log("Info logged");
-        }
         vm.stopPrank();
+        console.log("Status types configured");
     }
 
     /**
      * @dev Demonstrate mint operation optimization
      */
     function _demonstrateMintOptimization() internal {
-        console.log("Info logged");
+        console.log("=== Mint Optimization Demo ===");
         
         // Create sample operations
         BatchOptimization.MintOperation[] memory operations = _createSampleMintOperations(30);
+        console.log("Created", operations.length, "sample mint operations");
         
         // Calculate optimal batching
         BatchOptimization.BatchResult memory result = optimizer.calculateMintBatching(operations);
-        
-        console.log("Info logged");
-        console.log("Info logged");
-        console.log("Info logged");
+        console.log("Calculated optimal batching strategy");
+        console.log("Will use", result.batchCount, "batches");
         
         // Execute the batches
         uint256[] memory tokenIds = optimizer.executeBatchedMints(operations);
-        console.log("Info logged");
+        console.log("Demo completed - minted", tokenIds.length, "tokens");
     }
 
     /**
      * @dev Demonstrate migrate operation optimization
      */
     function _demonstrateMigrateOptimization() internal {
-        console.log("Info logged");
+        console.log("=== Migration Optimization Demo ===");
         
         // Create sample operations
         BatchOptimization.MigrateOperation[] memory operations = _createSampleMigrateOperations(12);
+        console.log("Created", operations.length, "sample migrate operations");
         
         // Calculate optimal batching
         BatchOptimization.BatchResult memory result = optimizer.calculateMigrateBatching(operations);
-        
-        console.log("Info logged");
-        console.log("Info logged");
-        console.log("Info logged");
+        console.log("Calculated optimal batching strategy");
+        console.log("Will use", result.batchCount, "batches");
         
         // Execute the batches
         uint256[] memory tokenIds = optimizer.executeBatchedMigrations(operations);
-        console.log("Info logged");
+        console.log("Demo completed - migrated", tokenIds.length, "tokens");
     }
 
     /**
      * @dev Demonstrate gas cost analysis for different scenarios
      */
     function _demonstrateGasCostAnalysis() internal {
-        console.log("Info logged");
+        console.log("=== Gas Cost Analysis Demo ===");
         
         // Analyze adding items to different batch sizes
         uint256 cost1to5 = optimizer.calculateAdditionalGasCost(1, 4, "mint", 0);
         uint256 cost5to10 = optimizer.calculateAdditionalGasCost(5, 5, "mint", 0);
         uint256 cost10to15 = optimizer.calculateAdditionalGasCost(10, 5, "mint", 0);
         
-        console.log("Info logged");
-        console.log("Info logged");
-        console.log("Info logged");
-        console.log("Info logged");
+        console.log("Mint cost analysis completed");
+        console.log("Cost 1->5:", cost1to5);
+        console.log("Cost 5->10:", cost5to10);
+        console.log("Cost 10->15:", cost10to15);
         
         // Analyze for migrate operations
-        uint256 migrateCost1to3 = optimizer.calculateAdditionalGasCost(1, 2, "migrate", 2);
-        uint256 migrateCost3to6 = optimizer.calculateAdditionalGasCost(3, 3, "migrate", 2);
+        optimizer.calculateAdditionalGasCost(1, 2, "migrate", 2);
+        optimizer.calculateAdditionalGasCost(3, 3, "migrate", 2);
         
-        console.log("Info logged");
-        console.log("Info logged");
-        console.log("Info logged");
+        console.log("Migrate cost analysis completed");
+        console.log("Migration costs calculated for different batch sizes");
     }
 
     /**

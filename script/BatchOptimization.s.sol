@@ -148,12 +148,10 @@ contract BatchOptimization is Script {
         
         emit GasAnalysisComplete("mint", analysis.baseGas, analysis.perItemGas, analysis.maxBatchSize);
         
-        console.log("Info logged");
-        console.log("Info logged");
-        console.log("Info logged");
-        console.log("Info logged");
-        console.log("Info logged");
-        console.log("Info logged");
+        console.log("=== Mint Analysis Complete ===");
+        console.log("Base gas cost:", analysis.baseGas);
+        console.log("Per-item gas cost:", analysis.perItemGas);
+        console.log("Optimal batch size:", analysis.maxBatchSize);
         
         return analysis;
     }
@@ -209,13 +207,11 @@ contract BatchOptimization is Script {
         
         emit GasAnalysisComplete("migrate", analysis.baseGas, analysis.perItemGas, analysis.maxBatchSize);
         
-        console.log("Info logged");
-        console.log("Info logged");
-        console.log("Info logged");
-        console.log("Info logged");
-        console.log("Info logged");
-        console.log("Info logged");
-        console.log("Info logged");
+        console.log("=== Migrate Analysis Complete ===");
+        console.log("Base gas cost:", analysis.baseGas);
+        console.log("Per-item gas cost:", analysis.perItemGas);
+        console.log("Optimal batch size:", analysis.maxBatchSize);
+        console.log("Avg gas per status:", analysis.averageGasPerItem / statusCount);
         
         return analysis;
     }
@@ -274,11 +270,10 @@ contract BatchOptimization is Script {
         
         emit BatchingComplete("mint", totalOps, batchCount, totalGasEstimate);
         
-        console.log("Info logged");
-        console.log("Info logged");
-        console.log("Info logged");
-        console.log("Info logged");
-        console.log("Info logged");
+        console.log("=== Mint Batching Complete ===");
+        console.log("Total operations:", totalOps);
+        console.log("Number of batches:", batchCount);
+        console.log("Estimated total gas:", totalGasEstimate);
         
         return result;
     }
@@ -340,12 +335,11 @@ contract BatchOptimization is Script {
         
         emit BatchingComplete("migrate", totalOps, batchCount, totalGasEstimate);
         
-        console.log("Info logged");
-        console.log("Info logged");
-        console.log("Info logged");
-        console.log("Info logged");
-        console.log("Info logged");
-        console.log("Info logged");
+        console.log("=== Migrate Batching Complete ===");
+        console.log("Total operations:", totalOps);
+        console.log("Average statuses per op:", avgStatusCount);
+        console.log("Number of batches:", batchCount);
+        console.log("Estimated total gas:", totalGasEstimate);
         
         return result;
     }
@@ -395,15 +389,13 @@ contract BatchOptimization is Script {
                 tokenIds[tokenIdIndex++] = batchTokenIds[i];
             }
             
-            console.log("Info logged");
-            console.log("Info logged");
         }
         
         vm.stopPrank();
         
-        console.log("Info logged");
-        console.log("Info logged");
-        console.log("Info logged");
+        console.log("=== Mint Execution Complete ===");
+        console.log("Total tokens minted:", tokenIds.length);
+        console.log("Executed in", batchResult.batchCount, "batches");
         
         return tokenIds;
     }
@@ -451,14 +443,13 @@ contract BatchOptimization is Script {
                 tokenIds[tokenIdIndex++] = batchTokenIds[i];
             }
             
-            console.log("Info logged");
         }
         
         vm.stopPrank();
         
-        console.log("Info logged");
-        console.log("Info logged");
-        console.log("Info logged");
+        console.log("=== Migration Execution Complete ===");
+        console.log("Total tokens migrated:", tokenIds.length);
+        console.log("Executed in", batchResult.batchCount, "batches");
         
         return tokenIds;
     }
@@ -499,8 +490,8 @@ contract BatchOptimization is Script {
         
         vm.stopPrank();
         
-        console.log("Info logged");
-        console.log("Info logged");
+        console.log("=== Gas Cost Analysis ===");
+        console.log("Additional gas for", additionalItems, "items:", additionalGas);
         
         return additionalGas;
     }
