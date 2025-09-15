@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/health.schema.json",
+  "title": "ServiceHealthReport",
+  "type": "object",
+  "required": ["service", "status", "timestamp", "checks", "summary"],
+  "properties": {
+    "service": { "type": "string" },
+    "status": { "enum": ["healthy", "degraded", "unhealthy"] },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "version": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "componentType", "status", "severity", "timeMs"],
+        "properties": {
+          "name": { "type": "string" },
+          "componentType": {
+            "enum": [
+              "database",
+              "queue",
+              "cache",
+              "http",
+              "scheduler",
+              "filesystem",
+              "blockchain",
+              "other"
+            ]
+          },
+          "status": { "enum": ["pass", "fail", "warn"] },
+          "severity": { "enum": ["critical", "non_critical"] },
+          "observedValue": {},
+          "expected": {},
+          "timeMs": { "type": "number" },
+          "output": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": ["pass", "warn", "fail"],
+      "properties": {
+        "pass": { "type": "number" },
+        "warn": { "type": "number" },
+        "fail": { "type": "number" }
+      }
+    }
+  },
+  "additionalProperties": false
+}
+

@@ -1,0 +1,137 @@
+groups:
+  - orgId: 1
+    name: common-log-alerts
+    folder: Observability
+    interval: 1m
+    rules:
+      - uid: error-spike
+        title: Error spike > 5 in 60s
+        condition: A
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: loki
+            model:
+              queryType: range
+              expr: sum by (service) (count_over_time({level="error"}[1m])) > 5
+              instant: false
+        annotations:
+          severity: critical
+        labels:
+          team: platform
+          env: ${ENV}
+      - uid: health-fail-log
+        title: Health check failed log
+        condition: A
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: loki
+            model:
+              queryType: range
+              expr: sum(count_over_time({app=~"server|worker|monitor|cron"} |= "HEALTH_CHECK_FAIL" [5m])) > 0
+              instant: false
+        annotations:
+          severity: critical
+        labels:
+          team: platform
+          env: ${ENV}
+
+  - orgId: 1
+    name: server-api
+    folder: Services
+    interval: 1m
+    rules:
+      - uid: server-5xx-rate
+        title: Server 5xx rate > 2%
+        condition: A
+        data:
+          - refId: A
+            datasourceUid: prometheus
+            relativeTimeRange:
+              from: 600
+              to: 0
+            model:
+              expr: |
+                sum(rate(http_requests_total{service="server",status=~"5.."}[5m]))
+                  /
+                sum(rate(http_requests_total{service="server"}[5m])) > 0.02
+              instant: false
+        annotations:
+          severity: critical
+        labels:
+          service: server
+          env: ${ENV}
+
+  - orgId: 1
+    name: worker-queues
+    folder: Services
+    interval: 1m
+    rules:
+      - uid: worker-queue-lag
+        title: Worker queue lag critical
+        condition: A
+        data:
+          - refId: A
+            datasourceUid: prometheus
+            relativeTimeRange:
+              from: 600
+              to: 0
+            model:
+              expr: max(queue_oldest_age_seconds{service="worker"}) > 300
+              instant: false
+        annotations:
+          severity: critical
+        labels:
+          service: worker
+          env: ${ENV}
+
+  - orgId: 1
+    name: cron-scheduler
+    folder: Services
+    interval: 1m
+    rules:
+      - uid: cron-drift
+        title: Cron scheduler drift > 5m
+        condition: A
+        data:
+          - refId: A
+            datasourceUid: prometheus
+            relativeTimeRange:
+              from: 600
+              to: 0
+            model:
+              expr: max(time() - cron_last_success_timestamp_seconds{job_type="critical"}) > 300
+              instant: false
+        annotations:
+          severity: critical
+        labels:
+          service: cron
+          env: ${ENV}
+
+  - orgId: 1
+    name: monitor-indexer
+    folder: Services
+    interval: 1m
+    rules:
+      - uid: monitor-rpc-down
+        title: Monitor RPC dependency down
+        condition: A
+        data:
+          - refId: A
+            datasourceUid: prometheus
+            relativeTimeRange:
+              from: 600
+              to: 0
+            model:
+              expr: min_over_time(dependency_up{service="monitor",name="chainRpc"}[5m]) < 1
+              instant: false
+        annotations:
+          severity: critical
+        labels:
+          service: monitor
+          env: ${ENV}
